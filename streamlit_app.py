@@ -85,6 +85,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def main():
+    # Set display mode to Table View only
+    display_mode = "📋 Table View (Compact)"
+
     # Check imports first
     if not IMPORT_SUCCESS:
         st.error("❌ Failed to import required modules. Please check your installation.")
@@ -187,6 +190,7 @@ def main():
             help="Upload your NZ Powerball historical data in CSV format. Click '❓ Help & Instructions' above for details."
         )
 
+
         # Prediction mode
         st.subheader("🎯 Prediction Mode")
 
@@ -270,6 +274,8 @@ def main():
             type="primary",
             use_container_width=True
         )
+
+    # Display mode is fixed to Table View (Compact) only
 
     # Main content area
     if uploaded_file is not None:
@@ -381,6 +387,12 @@ def generate_tickets(df, use_tft, tft_mode, num_tickets, custom_seed, jackpot_am
         # Load data (this will train TFT models if enabled)
         optimizer.load_historical_data()
 
+        # Surface engine status in Streamlit
+        if use_tft:
+            st.success("🤖 AI mode ON (TFT)")
+        else:
+            st.warning("🎲 Uniform mode (no TFT)")
+
         # Set TFT mode if using TFT
         if use_tft:
             optimizer.tft_mode = tft_mode
@@ -415,7 +427,7 @@ def generate_tickets(df, use_tft, tft_mode, num_tickets, custom_seed, jackpot_am
         status_text.text("✅ Optimization complete!")
 
         # Display results
-        display_results(optimizer, portfolio, expected_value_analysis, use_tft, tft_mode)
+        display_results(optimizer, portfolio, expected_value_analysis, use_tft, tft_mode, "📋 Table View (Compact)")
 
     except Exception as e:
         st.error(f"❌ Error during optimization: {str(e)}")
@@ -428,7 +440,7 @@ def generate_tickets(df, use_tft, tft_mode, num_tickets, custom_seed, jackpot_am
         except:
             pass
 
-def display_results(optimizer, portfolio, expected_value_analysis, use_tft, tft_mode):
+def display_results(optimizer, portfolio, expected_value_analysis, use_tft, tft_mode, display_mode):
     """Display the optimization results in a user-friendly format."""
 
     st.markdown('<div class="sub-header">🎉 Your Optimized Tickets</div>', unsafe_allow_html=True)
@@ -462,152 +474,11 @@ def display_results(optimizer, portfolio, expected_value_analysis, use_tft, tft_
     # Enhanced Tickets display with beautiful ball styling
     st.subheader("🎫 Your Optimized Tickets")
 
-    # Add custom CSS for enhanced ticket display (Light Mode Optimized)
-    st.markdown("""
-    <style>
-        .lottery-ball {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin: 0.25rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            border: 2px solid #fff;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .lottery-ball:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-        }
-        .main-ball {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #000;
-        }
-        .bonus-ball {
-            background: linear-gradient(135deg, #FF6B35, #F7931E);
-            color: #FFF;
-        }
-        .powerball {
-            background: linear-gradient(135deg, #DC143C, #FF0000);
-            color: #FFF;
-        }
-        .ticket-container {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 1.5rem 0;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            border: 2px solid #dee2e6;
-        }
-        .ticket-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        .ticket-number {
-            background: linear-gradient(135deg, #FFD700, #FF6B35);
-            color: #000;
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 1.2rem;
-            display: inline-block;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .stats-card {
-            background: #ffffff;
-            border-radius: 15px;
-            padding: 1rem;
-            margin-top: 1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border: 1px solid #dee2e6;
-        }
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-            padding: 0.5rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .stat-label {
-            color: #495057;
-            font-weight: 600;
-        }
-        .stat-value {
-            color: #1f77b4;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+    # Display mode is fixed to Table View (Compact) for easy comparison
+    st.info("📋 **Table View**: All tickets displayed in a compact, comparable format for easy analysis")
 
-    for i, ticket in enumerate(portfolio, 1):
-        # Ticket container with gradient background
-        st.markdown(f"""
-        <div class="ticket-container">
-            <div class="ticket-header">
-                <div class="ticket-number">🎫 Ticket #{i}</div>
-                <h3 style="color: #1f77b4; margin: 0.5rem 0;">Your Lucky Numbers</h3>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Main numbers section
-        st.markdown("#### 🎯 Main Numbers (1-40)")
-        main_balls_html = '<div style="text-align: center; margin: 1rem 0;">'
-        for ball in sorted(ticket['main_balls']):
-            main_balls_html += f'<div class="lottery-ball main-ball">{ball:02d}</div>'
-        main_balls_html += '</div>'
-        st.markdown(main_balls_html, unsafe_allow_html=True)
-
-        # Bonus and Powerball in columns
-        col1, col2, col3 = st.columns([1, 1, 2])
-
-        with col1:
-            bonus = ticket.get('bonus', 0)
-            st.markdown("#### 🎁 Bonus Ball")
-            bonus_html = f'<div style="text-align: center; margin: 1rem 0;"><div class="lottery-ball bonus-ball">{bonus:02d}</div></div>'
-            st.markdown(bonus_html, unsafe_allow_html=True)
-
-        with col2:
-            st.markdown("#### ⚡ Powerball")
-            pb_html = f'<div style="text-align: center; margin: 1rem 0;"><div class="lottery-ball powerball">{ticket["powerball"]:02d}</div></div>'
-            st.markdown(pb_html, unsafe_allow_html=True)
-
-        with col3:
-            # Statistics card
-            st.markdown("#### 📊 Statistics")
-            st.markdown(f"""
-            <div class="stats-card">
-                <div class="stat-item">
-                    <span class="stat-label">Sum of Numbers:</span>
-                    <span class="stat-value">{ticket['sum']}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Odd/Even Balance:</span>
-                    <span class="stat-value">{ticket['odd_count']}/{ticket['even_count']}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Number Range:</span>
-                    <span class="stat-value">{min(ticket['main_balls'])} - {max(ticket['main_balls'])}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Average Number:</span>
-                    <span class="stat-value">{ticket['sum'] // 6}</span>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # Add some spacing between tickets
-        if i < len(portfolio):
-            st.markdown("<br>", unsafe_allow_html=True)
+    # Display tickets in Table View (Compact) only
+    display_tickets_table(portfolio)
 
     # Enhanced Portfolio Analysis with beautiful visualizations
     st.subheader("📊 Portfolio Analysis")
@@ -932,6 +803,373 @@ Tickets:
             mime="text/plain",
             use_container_width=True
         )
+
+# ===== DISPLAY FUNCTIONS =====
+
+def display_tickets_cards(portfolio):
+    """Display tickets in the original beautiful card format."""
+    # Add custom CSS for enhanced ticket display (Light Mode Optimized)
+    st.markdown("""
+    <style>
+        .lottery-ball {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 0.25rem;
+            border: 2px solid;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        .lottery-ball:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        }
+        .main-ball {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border-color: #ee5a24;
+        }
+        .bonus-ball {
+            background: linear-gradient(135deg, #ffa726, #fb8c00);
+            color: white;
+            border-color: #fb8c00;
+        }
+        .powerball {
+            background: linear-gradient(135deg, #ab47bc, #8e24aa);
+            color: white;
+            border-color: #8e24aa;
+        }
+        .ticket-container {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 2px solid #dee2e6;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        .ticket-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        .ticket-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .ticket-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f77b4;
+            margin-bottom: 0.5rem;
+        }
+        .stats-card {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 2px solid #dee2e6;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .stat-item:hover {
+            background: #e9ecef;
+        }
+        .stat-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .stat-value {
+            font-weight: 700;
+            color: #1f77b4;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    for i, ticket in enumerate(portfolio, 1):
+        # Ticket container with gradient background
+        st.markdown(f"""
+        <div class="ticket-container">
+            <div class="ticket-header">
+                <div class="ticket-number">🎫 Ticket #{i}</div>
+                <h3 style="color: #1f77b4; margin: 0.5rem 0;">Your Lucky Numbers</h3>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Main numbers section
+        st.markdown("#### 🎯 Main Numbers (1-40)")
+        main_balls_html = '<div style="text-align: center; margin: 1rem 0;">'
+        for ball in sorted(ticket['main_balls']):
+            main_balls_html += f'<div class="lottery-ball main-ball">{ball:02d}</div>'
+        main_balls_html += '</div>'
+        st.markdown(main_balls_html, unsafe_allow_html=True)
+
+        # Bonus and Powerball in columns
+        col1, col2, col3 = st.columns([1, 1, 2])
+
+        with col1:
+            bonus = ticket.get('bonus', 0)
+            st.markdown("#### 🎁 Bonus Ball")
+            bonus_html = f'<div style="text-align: center; margin: 1rem 0;"><div class="lottery-ball bonus-ball">{bonus:02d}</div></div>'
+            st.markdown(bonus_html, unsafe_allow_html=True)
+
+        with col2:
+            st.markdown("#### ⚡ Powerball")
+            pb_html = f'<div style="text-align: center; margin: 1rem 0;"><div class="lottery-ball powerball">{ticket["powerball"]:02d}</div></div>'
+            st.markdown(pb_html, unsafe_allow_html=True)
+
+        with col3:
+            # Statistics card
+            st.markdown("#### 📊 Statistics")
+            st.markdown(f"""
+            <div class="stats-card">
+                <div class="stat-item">
+                    <span class="stat-label">Sum of Numbers:</span>
+                    <span class="stat-value">{ticket['sum']}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Odd/Even Balance:</span>
+                    <span class="stat-value">{ticket['odd_count']}/{ticket['even_count']}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Number Range:</span>
+                    <span class="stat-value">{min(ticket['main_balls'])} - {max(ticket['main_balls'])}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Average Number:</span>
+                    <span class="stat-value">{ticket['sum'] // 6}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Add some spacing between tickets
+        if i < len(portfolio):
+            st.markdown("<br>", unsafe_allow_html=True)
+
+
+def display_tickets_table(portfolio):
+    """Display tickets in a compact, comparable table format."""
+    st.markdown("""
+    <style>
+        .table-container {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 2px solid #dee2e6;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        }
+        .small-ball {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin: 0.1rem;
+            border: 1px solid;
+        }
+        .small-main-ball {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border-color: #ee5a24;
+        }
+        .small-bonus-ball {
+            background: linear-gradient(135deg, #ffa726, #fb8c00);
+            color: white;
+            border-color: #fb8c00;
+        }
+        .small-powerball {
+            background: linear-gradient(135deg, #ab47bc, #8e24aa);
+            color: white;
+            border-color: #8e24aa;
+        }
+        .table-header {
+            background: linear-gradient(135deg, #1f77b4, #17a2b8);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .table-row {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        .table-row:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+        .table-cell {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+        }
+        .ticket-id {
+            font-weight: 700;
+            color: #1f77b4;
+            font-size: 1.1rem;
+        }
+        .numbers-display {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="table-container">', unsafe_allow_html=True)
+    st.markdown('<div class="table-header">📊 Your Optimized Tickets - Compact View</div>', unsafe_allow_html=True)
+
+    # Table header
+    st.markdown("""
+    <div style="display: flex; align-items: center; padding: 0.75rem; background: #e9ecef; border-radius: 8px; margin-bottom: 0.5rem; font-weight: 700; color: #495057;">
+        <div style="flex: 0.5; text-align: center;">#</div>
+        <div style="flex: 2; text-align: center;">Main Numbers</div>
+        <div style="flex: 1; text-align: center;">Bonus</div>
+        <div style="flex: 1; text-align: center;">Powerball</div>
+        <div style="flex: 1; text-align: center;">Sum</div>
+        <div style="flex: 1; text-align: center;">O/E</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Table rows
+    for i, ticket in enumerate(portfolio, 1):
+        main_numbers_html = '<div class="numbers-display">'
+        for ball in sorted(ticket['main_balls']):
+            main_numbers_html += f'<div class="small-ball small-main-ball">{ball:02d}</div>'
+        main_numbers_html += '</div>'
+
+        st.markdown(f"""
+        <div class="table-row">
+            <div class="table-cell ticket-id">#{i}</div>
+            <div class="table-cell">{main_numbers_html}</div>
+            <div class="table-cell">
+                <div class="small-ball small-bonus-ball">{ticket.get('bonus', 0):02d}</div>
+            </div>
+            <div class="table-cell">
+                <div class="small-ball small-powerball">{ticket['powerball']:02d}</div>
+            </div>
+            <div class="table-cell">{ticket['sum']}</div>
+            <div class="table-cell">{ticket['odd_count']}/{ticket['even_count']}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+def display_tickets_list(portfolio):
+    """Display tickets in a fast, compact list format."""
+    st.markdown("""
+    <style>
+        .list-container {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 2px solid #dee2e6;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        }
+        .list-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        .list-item:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .list-number {
+            font-weight: 700;
+            color: #1f77b4;
+            font-size: 1.1rem;
+            min-width: 40px;
+            text-align: center;
+        }
+        .list-numbers {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #495057;
+            font-size: 1rem;
+        }
+        .list-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .stat-chip {
+            background: #ffffff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            border: 1px solid #dee2e6;
+            font-weight: 600;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="list-container">', unsafe_allow_html=True)
+    st.markdown('<div class="list-header">📜 Your Optimized Tickets - Fast View</div>', unsafe_allow_html=True)
+
+    for i, ticket in enumerate(portfolio, 1):
+        main_nums_str = ' '.join([f'{n:02d}' for n in sorted(ticket['main_balls'])])
+        bonus = ticket.get('bonus', 0)
+        pb = ticket['powerball']
+
+        st.markdown(f"""
+        <div class="list-item">
+            <div class="list-number">#{i}</div>
+            <div class="list-numbers">
+                🎯 {main_nums_str} | 🎁 {bonus:02d} | ⚡ {pb:02d}
+            </div>
+            <div class="list-stats">
+                <span class="stat-chip">Sum: {ticket['sum']}</span>
+                <span class="stat-chip">O/E: {ticket['odd_count']}/{ticket['even_count']}</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
