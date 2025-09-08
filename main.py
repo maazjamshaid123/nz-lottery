@@ -458,40 +458,6 @@ def predict_probs(model: TemporalFusionTransformer, validation_dataset: TimeSeri
 
     return out[1:]  # Return 1-based array
 
-def calibrate_probabilities(y_true: np.ndarray, y_pred: np.ndarray,
-                          method: str = 'isotonic') -> callable:
-    """
-    Calibrate predicted probabilities using isotonic regression or Platt scaling.
-
-    Args:
-        y_true: True binary labels
-        y_pred: Predicted probabilities
-        method: 'isotonic' or 'platt'
-
-    Returns:
-        Calibration function
-    """
-    if method == 'isotonic':
-        from sklearn.isotonic import IsotonicRegression
-        calibrator = IsotonicRegression(out_of_bounds='clip')
-    elif method == 'platt':
-        from sklearn.linear_model import LogisticRegression
-        calibrator = LogisticRegression()
-    else:
-        raise ValueError("Method must be 'isotonic' or 'platt'")
-
-    # Fit calibrator
-    calibrator.fit(y_pred.reshape(-1, 1), y_true)
-
-    # Return calibration function
-    if method == 'isotonic':
-        def calibrate_func(probs):
-            return calibrator.predict_proba(probs.reshape(-1, 1))[:, 1]
-    else:
-        def calibrate_func(probs):
-            return calibrator.predict_proba(probs.reshape(-1, 1))[:, 1]
-
-    return calibrate_func
 
 def apply_guardrails(p: np.ndarray, task: str) -> np.ndarray:
     """
@@ -999,9 +965,9 @@ class NZPowerballTicketOptimizer:
             self.p_bonus = apply_popularity_penalty(self.p_bonus, self.popular_patterns, penalty_factor=0.3)
 
         print("📊 Prediction ranges after calibration:")
-        print(".4f")
-        print(".4f")
-        print(".4f")
+        print(f"Main p range: [{self.p_main.min():.4f}, {self.p_main.max():.4f}]")
+        print(f"Bonus p range: [{self.p_bonus.min():.4f}, {self.p_bonus.max():.4f}]")
+        print(f"PB p range: [{self.p_pb.min():.4f}, {self.p_pb.max():.4f}]")
 
     def _validate_predictions(self):
         """Validate TFT predictions for reasonableness."""
@@ -1066,7 +1032,7 @@ class NZPowerballTicketOptimizer:
 
             print("📊 TFT Validation Metrics:")
             for key, value in metrics.items():
-                print(".4f")
+                print(f"  {key}: {value:.4f}")
 
         except Exception as e:
             print(f"⚠️  TFT validation failed: {e}")
@@ -1136,8 +1102,8 @@ class NZPowerballTicketOptimizer:
             else:
                 # Fallback to original uniform generation
                 main_balls = self._generate_main_balls(constraints)
-                powerball = self.rng.randint(*self.POWERBALL_RANGE)
-                bonus_ball = self.rng.randint(*self.MAIN_BALL_RANGE)  # Bonus is from same range
+            powerball = self.rng.randint(*self.POWERBALL_RANGE)
+            bonus_ball = self.rng.randint(*self.MAIN_BALL_RANGE)  # Bonus is from same range
 
             # Validate against constraints
             if self._validate_ticket_constraints(main_balls, powerball, constraints, bonus_ball):
