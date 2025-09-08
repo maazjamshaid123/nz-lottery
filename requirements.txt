@@ -1,20 +1,21 @@
 # Core dependencies
-streamlit>=1.28.0
-pandas>=1.5.0
-numpy>=1.21.0
+streamlit
+pandas
+numpy
 
 # Optional ML dependencies (for TFT models)
-torch>=1.12.0
-pytorch-forecasting>=0.10.0
-pytorch-lightning>=1.6.0
-scikit-learn>=1.0.0
+torch
+pytorch-forecasting
+pytorch-lightning
+scikit-learn
 
 # PyInstaller for creating executable
-pyinstaller>=6.0.0
+pyinstaller
 
 # Additional dependencies that might be needed
-plotly>=5.0.0
-matplotlib>=3.5.0
-seaborn>=0.11.0
+plotly
+matplotlib
+seaborn
+
 
 
